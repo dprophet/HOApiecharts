@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Awesome-pyecharts</title>
+    <title>HOA Pie Charts</title>
     <script type="text/javascript">
 
 function loadScript(url, callback) {
@@ -27,21 +27,21 @@ function loadScript(url, callback) {
         }
 
         // Load RequireJS asynchronously
-        loadScript("https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js", function () {
+        loadScript("scripts/require.min.js", function () {
             console.log('RequireJS loaded.');
 
             requirejs.config({
                 paths: {
-                    echarts: 'https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.0/echarts.min',
-                    'encrypted-yearly-data': 'https://natanyanderson.github.io/HOApiecharts/HOA%20pie%20charts/encryptedyearlydata',
-                    'yearly-data': 'yearlydata',
+                    echarts: 'scripts/echarts.min',
+                    'encrypted-yearly-data': 'encrypted_hoa_data',
+                    'yearly-data': 'hoa_yearlydata',
                     'crypto-js': 'scripts/crypto-js.min'
                 }
             });
 
             // Load ECharts and the data module
-            requirejs(['echarts', 'encrypted-yearly-data', 'yearly-data', 'crypto-js'], function(echarts, encrypteddata, yearydata, CryptoJS) {
-                renderCharts(echarts, encrypteddata, yearydata, CryptoJS);
+            requirejs(['echarts', 'encrypted-yearly-data', 'yearly-data', 'crypto-js'], function(echarts, encrypteddata, inyearlydata, CryptoJS) {
+                renderCharts(echarts, encrypteddata, inyearlydata, CryptoJS);
             });
         });
 
@@ -77,11 +77,19 @@ function loadScript(url, callback) {
             return  Object.keys(yearlydata[year].expenses);
         }        
 
+        function formatKey(inKey) {
+            if (inKey.startsWith("\t")) {
+                return "\t•" + inKey;
+            }
+                return inKey;
+        }        
+
+
         function generateSubtext(income) {
 
             const subData = Object.keys(income).map(key => {
                 if (income[key]) {
-                    return key.toLocaleString() + ": " + income[key].toLocaleString();
+                    return key.toLocaleString() + ": " + formatCurrency(income[key]);
                 } else {
                     return key.toLocaleString();
                 }
@@ -93,6 +101,47 @@ function loadScript(url, callback) {
 
             return result;
         }
+
+        function getTitleWithColoredText(yearlydata, year) {
+            let titleText = '';
+            const income = yearlydata[year].income;
+
+            let result = "Expenses Distribution for " + year + "\n\n";
+
+            // Loop through the keys to generate the title text with proper formatting
+            const subData = Object.keys(income).map(key => {
+                const value = income[key];
+                console.log("getTitleWithColoredText: key=", key)
+                if (key.startsWith('Net Profit')) {
+                    const colorTag = value >= 0 ? 'positive' : 'negative';
+
+                    if ( value <= 0 ) {
+                        return '{negative|Net Profit(Loss): ' + formatCurrency(value) + '}';  // Green for positive
+                    } else {
+                        return '{positive|Net Profit: ' + formatCurrency(value) + '}';  // Green for positive
+                    }
+                } else {
+                    if (value) {
+                        return '{default|' + formatKey(key) + ': ' + formatCurrency(value) + '}';  // Black for default
+                    } else {
+                        return '{default|' + key + '}';
+                    }
+                }
+            });
+
+            console.log("getTitleWithColoredText: subData=", subData)
+
+            result += subData.join('\n');
+            return result;
+        }
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0, // This removes cents if you don't need them
+            }).format(value);
+        }        
 
         function renderCharts(echarts, encrypteddata, inyearlydata, CryptoJS) {
             if (typeof echarts === 'undefined') {
@@ -108,6 +157,7 @@ function loadScript(url, callback) {
             const password = getQueryParams().password;
             const year = getQueryParams().year || '2003';
 
+            console.log("inyearlydata=", inyearlydata);
             console.log("password=", password, ", year=", year);
 
             const yearlydata = inyearlydata || decryptContent(encrypteddata, password, CryptoJS);
@@ -122,7 +172,8 @@ function loadScript(url, callback) {
 
             const legendData = convertDataToLegend(yearlydata, year);
 
-            const subTextData = generateSubtext(yearlydata[year].income);
+            // const subTextData = generateSubtext(yearlydata[year].income);
+            const subTextData = getTitleWithColoredText(yearlydata, year);
 
             var option = {
                 "animation": true,
@@ -248,23 +299,29 @@ function loadScript(url, callback) {
                 },
                 "title": [
                     {
-                        "show": false,
-                        "text": "Expenses Distribution for " + year,
+                        "show": true,
+                        "text": subTextData,
                         "target": "blank",
-                        "subtext": subTextData,
-                        "subtarget": "blank",
                         "padding": 5,
                         "itemGap": 10,
                         "textAlign": "auto",
                         "textVerticalAlign": "auto",
                         "triggerEvent": false,
                         "textStyle": {
+                            "rich": {
+                                "positive": {
+                                    "color": "green", // Green for positive values
+                                },
+                                "negative": {
+                                    "color": "red", // Red for negative values
+                                },
+                                "default": {
+                                    "color": "black", // Red for negative values
+                                }
+                            },
+                            "fontSize": 14, // Standard font size
                             "fontWeight": "bold",
-                            "fontSize": 20
-                        },
-                        "subtextStyle": {
-                            "fontWeight": "bold",
-                            "fontSize": 14
+                            "lineHeight": 20 // Line height for better readability
                         }
                     }
                 ]
@@ -285,11 +342,16 @@ function loadScript(url, callback) {
             mychart.on('mouseout', function () {
                 mychart.setOption({
                     title: {
-                        show: false  // Hide the title when mouse leaves the chart
+                        show: true  // Hide the title when mouse leaves the chart
                     }
                 });
             });
         }
+
+        // Listen for messages in the iframe (for testing purposes)
+        window.addEventListener('message', function(event) {
+            console.log('expenses_pie_chart: Message received in expenses_pie_chart iframe:', event.data);
+        });        
 
     </script>
 

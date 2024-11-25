@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Awesome-pyecharts</title>
+    <script type="text/javascript">
+
+        function loadScript(url, callback) {
+            var script = document.createElement("script");
+            script.type = "text/javascript";
+            
+            if (script.readyState) {  // IE
+                script.onreadystatechange = function () {
+                    if (script.readyState === "loaded" || script.readyState === "complete") {
+                        script.onreadystatechange = null;
+                        callback();
+                    }
+                };
+            } else {  // Others
+                script.onload = function () {
+                    callback();
+                };
+            }
+            
+            script.src = url;
+            document.getElementsByTagName("head")[0].appendChild(script);
+        }
+
+        // Load RequireJS asynchronously
+        loadScript("scripts/require.min.js", function () {
+            console.log('RequireJS loaded.');
+
+            requirejs.config({
+                paths: {
+                    echarts: 'scripts/echarts.min',
+                    'encrypted-yearly-data': 'encrypted_hoa_data',
+                    'yearly-data': 'hoa_yearlydata',
+                    'crypto-js': 'scripts/crypto-js.min'
+                }
+            });
+
+            // Load ECharts and the data module
+            requirejs(['echarts', 'encrypted-yearly-data', 'yearly-data', 'crypto-js'], function(echarts, encrypteddata, inyearlydata, CryptoJS) {
+                renderCharts(echarts, encrypteddata, inyearlydata, CryptoJS);
+            });
+        });
+
+        function getQueryParams() {
+            const params = {};
+            window.location.search
+                .substr(1)
+                .split("&")
+                .forEach(function (item) {
+                    const [key, value] = item.split("=");
+                    params[key] = decodeURIComponent(value);
+                });
+            return params;
+        }
+
+        function decryptContent(encrypteddata, password, CryptoJS) {
+            const decrypted = CryptoJS.AES.decrypt(encrypteddata, password);
+            const decryptedText = decrypted.toString(CryptoJS.enc.Utf8);
+            console.log(decryptedText)
+            const decryptedJSON = JSON.parse(decryptedText);
+            return decryptedJSON;
+        }        
+
+        function convertDataToLegend(yearlydata, year) {
+            return  Object.keys(yearlydata[year].expenses);
+        }        
+
+        function generateSubtext(income) {
+
+            const subData = Object.keys(income).map(key => {
+                if (income[key]) {
+                    return key.toLocaleString() + ": " + income[key].toLocaleString();
+                } else {
+                    return key.toLocaleString();
+                }
+            });
+
+            console.log("generateSubtext: subData=", subData);
+
+            const result = subData.join('\n');
+
+            return result;
+        }
+
+        function getTitleWithColoredText(yearlydata, year) {
+            let titleText = '';
+            const income = yearlydata[year].income;
+
+            let result = "Expenses Distribution for " + year + "\n\n";
+
+            // Loop through the keys to generate the title text with proper formatting
+            const subData = Object.keys(income).map(key => {
+                const value = income[key];
+                console.log("getTitleWithColoredText: key=", key)
+                if (key.startsWith('Net Profit')) {
+                    const colorTag = value >= 0 ? 'positive' : 'negative';
+
+                    if ( value <= 0 ) {
+                        return '{negative|Net Profit(Loss): ' + value + '}';  // Green for positive
+                    } else {
+                        return '{positive|Net Profit: ' + value + '}';  // Green for positive
+                    }
+                } else {
+                    if (value) {
+                        return '{default|' + key + ': ' + value + '}';  // Black for default
+                    } else {
+                        return '{default|' + key + '}';
+                    }
+                }
+            });
+
+            console.log("getTitleWithColoredText: subData=", subData)
+
+            result += subData.join('\n');
+            return result;
+        }
+
+        // Function to iterate over the data structure and populate the selection box
+        function populateSeriesSelectionBox(data) {
+            const selectBox = document.getElementById('seriesSelect');
+            const seriesSet = new Set();  // Use a Set to avoid duplicates
+
+            // Iterate over each year and collect all series names from expenses, income, and assets
+            for (const year in data) {
+                const yearData = data[year];
+
+                // Extract keys from expenses, income, and assets and add to the set
+                Object.keys(yearData.expenses || {}).forEach(key => seriesSet.add(key));
+                Object.keys(yearData.income || {}).forEach(key => seriesSet.add(key));
+                Object.keys(yearData.assets || {}).forEach(key => seriesSet.add(key));
+            }
+
+            const sortedSeriesArray = Array.from(seriesSet).sort();
+
+            // Populate the selection box with the sorted series names
+            sortedSeriesArray.forEach(series => {
+                const option = document.createElement('option');
+                option.value = series;
+                option.textContent = series;
+                selectBox.appendChild(option);
+            });
+        }
+
+        // Function to update the chart when a series is selected
+        function updateChart(seriesName, yearlydata, mychart) {
+            const years = Object.keys(yearlydata);  // Get the years in the dataset
+            const seriesData = years.map(year => {
+                // Return the series value from expenses, income, or assets
+                return yearlydata[year].expenses[seriesName] || 
+                       yearlydata[year].income[seriesName] || 0
+            });
+
+            const minY = Math.min(...seriesData);
+            const maxY = Math.max(...seriesData);
+
+            // Setting up the ECharts option for the selected series
+            const option = {
+                title: {
+                    text: `Series: ${seriesName}`
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                xAxis: {
+                    type: 'category',
+                    data: years  // X-axis as the years
+                },
+                yAxis: {
+                    type: 'value',
+                    min: minY,  // Set min based on the data
+                    max: maxY   // Set max based on the data
+                },
+                series: [
+                    {
+                        name: seriesName,
+                        type: 'line',
+                        data: seriesData,  // Data for the selected series
+                        itemStyle: {
+                            color: 'blue'
+                        }
+                    }
+                ]
+            };
+
+            // Update the chart with the new option
+            mychart.setOption(option);
+        }
+
+
+        function renderCharts(echarts, encrypteddata, inyearlydata, CryptoJS) {
+            if (typeof echarts === 'undefined') {
+                console.error('ECharts library not loaded.');
+                return;
+            }
+
+            if ( inyearlydata ) {
+                console.log("linechart: inyearlydata");
+                console.log(JSON.stringify(inyearlydata));
+            }
+
+            var mychart = echarts.init(
+                        document.getElementById('lineChart'), 'white', {renderer: 'canvas'});
+
+            const yearlydata = inyearlydata || decryptContent(encrypteddata, password, CryptoJS);
+
+            updateChart
+
+            populateSeriesSelectionBox(yearlydata);
+
+            updateChart("Total Expenses", inyearlydata, mychart);
+
+
+            // Event listener for when a user selects a series from the dropdown
+            document.getElementById('seriesSelect').addEventListener('change', function() {
+                const selectedSeries = this.value;  // Get the selected series
+                console.log("linechart:seriesSelect: selectedSeries=", selectedSeries);
+                updateChart(selectedSeries, yearlydata, mychart);  // Update the chart with the selected series
+            });        
+
+            // Event listener for clicking on the 'Total Assets (Actual)' line
+            mychart.on('click', function (params) {
+                console.log("mychart.on: params", params);
+                    if (params.seriesName) {
+                    const selectedYear = params.name;  // The year clicked
+                    console.log('Year selected:', selectedYear);
+
+                    // Sending the year to the iframe
+                    //const iframe = document.parent.getElementById('iframe3');
+                    //iframe.contentWindow.postMessage({ year: selectedYear }, '*');  // Send the selected year
+                    window.parent.postMessage({ year: selectedYear }, '*'); 
+                }
+            });        
+        }
+
+        // Listen for messages in the iframe (for testing purposes)
+        window.addEventListener('message', function(event) {
+            console.log('expenses_pie_chart: Message received in expenses_pie_chart iframe:', event.data);
+        });
+    </script>
+
+</head>
+<body >
+    <label for="seriesSelect">Select Series:</label>
+    <select id="seriesSelect">
+        <option value="" disabled selected>Select a series</option>
+    </select>
+    <div id="lineChart" class="chart-container" style="width:90%; height:500px;"></div>
+</body>
+</html>

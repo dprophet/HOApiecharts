@@ -434,6 +434,24 @@
                 style: styleCondo4
             });
 
+/*
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.XYZ({
+                        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                        attributions: '© Mapbox', // You can add custom attributions here if needed
+                        maxZoom: 18, // Set max zoom level based on the tiles availability
+                        subdomains: ['a', 'b', 'c', 'd'], // Subdomains for {s} in the URL
+                    })
+                }),
+                vectorLayerCondo1,
+                vectorLayerCondo2,
+                vectorLayerCondo3,
+                vectorLayerCondo4
+
+*/
+
+
             const map = new ol.Map({
             layers: [
                 new ol.layer.Tile({
