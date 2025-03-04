@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Scarborough Glen Financial Metrics Example Dashboard</title>
+    <!-- Include Chart.js from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1, h2, h3 {
+            margin-top: 30px;
+        }
+        table {
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 700px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background: #f9f9f9;
+        }
+        .chart-container {
+            width: 100%;
+            max-width: 700px;
+            margin-bottom: 50px;
+        }
+        .chart-container canvas {
+            width: 100%;
+            height: 400px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Scarborough Glen Financial Metrics Dashboard</h1>
+<p>This dashboard is an example if how we could visualize our financial health metrics for all four condos and the HOA.</p>
+
+<!--
+   SAMPLE DATA (for demonstration):
+   We have five entities:
+   1) Condo 1
+   2) Condo 2
+   3) Condo 3
+   4) Condo 4
+   5) HOA
+   Adjust the numbers in the tables/charts as needed.
+-->
+
+<!-- ======================================== -->
+<!-- 1. Reserve Fund Ratio -->
+<!-- ======================================== -->
+
+<h2>1. Reserve Fund Ratio</h2>
+<p>The ratio of current reserve funds to estimated future repair &amp; replacement costs.</p>
+<table>
+    <thead>
+        <tr>
+            <th>Entity</th>
+            <th>Reserve Fund Ratio</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Condo 1</td>
+            <td>75%</td>
+        </tr>
+        <tr>
+            <td>Condo 2</td>
+            <td>65%</td>
+        </tr>
+        <tr>
+            <td>Condo 3</td>
+            <td>80%</td>
+        </tr>
+        <tr>
+            <td>Condo 4</td>
+            <td>55%</td>
+        </tr>
+        <tr>
+            <td>HOA</td>
+            <td>90%</td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="chart-container">
+    <canvas id="reserveFundChart"></canvas>
+</div>
+
+<!-- ======================================== -->
+<!-- 2. Operating Fund Surplus/Deficit -->
+<!-- ======================================== -->
+
+<h2>2. Operating Fund Surplus/Deficit</h2>
+<p>Annual operating surplus (revenues - operating expenses). Positive indicates surplus, negative indicates deficit.</p>
+<table>
+    <thead>
+        <tr>
+            <th>Entity</th>
+            <th>Surplus (USD)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Condo 1</td>
+            <td>20,000</td>
+        </tr>
+        <tr>
+            <td>Condo 2</td>
+            <td>5,000</td>
+        </tr>
+        <tr>
+            <td>Condo 3</td>
+            <td>8,000</td>
+        </tr>
+        <tr>
+            <td>Condo 4</td>
+            <td>-2,000</td>
+        </tr>
+        <tr>
+            <td>HOA</td>
+            <td>15,000</td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="chart-container">
+    <canvas id="operatingSurplusChart"></canvas>
+</div>
+
+<!-- ======================================== -->
+<!-- 3. Debt-to-Asset Ratio -->
+<!-- ======================================== -->
+
+<h2>3. Debt-to-Asset Ratio</h2>
+<p>Total liabilities divided by total assets. A lower ratio is generally healthier.</p>
+<table>
+    <thead>
+        <tr>
+            <th>Entity</th>
+            <th>Debt-to-Asset Ratio</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Condo 1</td>
+            <td>0.40</td>
+        </tr>
+        <tr>
+            <td>Condo 2</td>
+            <td>0.55</td>
+        </tr>
+        <tr>
+            <td>Condo 3</td>
+            <td>0.30</td>
+        </tr>
+        <tr>
+            <td>Condo 4</td>
+            <td>0.60</td>
+        </tr>
+        <tr>
+            <td>HOA</td>
+            <td>0.25</td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="chart-container">
+    <canvas id="debtToAssetChart"></canvas>
+</div>
+
+<!-- ======================================== -->
+<!-- 4. Delinquency Rate -->
+<!-- ======================================== -->
+
+<h2>4. Delinquency Rate</h2>
+<p>How many owners are behind on dues/assessments, as a percentage of annual dues.</p>
+<table>
+    <thead>
+        <tr>
+            <th>Entity</th>
+            <th>Delinquency Rate</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Condo 1</td>
+            <td>3.0%</td>
+        </tr>
+        <tr>
+            <td>Condo 2</td>
+            <td>5.5%</td>
+        </tr>
+        <tr>
+            <td>Condo 3</td>
+            <td>2.5%</td>
+        </tr>
+        <tr>
+            <td>Condo 4</td>
+            <td>6.0%</td>
+        </tr>
+        <tr>
+            <td>HOA</td>
+            <td>1.5%</td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="chart-container">
+    <canvas id="delinquencyRateChart"></canvas>
+</div>
+
+<!-- ======================================== -->
+<!-- 5. Net Operating Income (NOI) -->
+<!-- ======================================== -->
+
+<h2>5. Net Operating Income (NOI)</h2>
+<p>Total revenue minus operating expenses (excluding capital expenses).</p>
+<table>
+    <thead>
+        <tr>
+            <th>Entity</th>
+            <th>NOI (USD)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Condo 1</td>
+            <td>35,000</td>
+        </tr>
+        <tr>
+            <td>Condo 2</td>
+            <td>10,000</td>
+        </tr>
+        <tr>
+            <td>Condo 3</td>
+            <td>12,000</td>
+        </tr>
+        <tr>
+            <td>Condo 4</td>
+            <td>3,000</td>
+        </tr>
+        <tr>
+            <td>HOA</td>
+            <td>25,000</td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="chart-container">
+    <canvas id="noiChart"></canvas>
+</div>
+
+<!-- ======================================== -->
+<!-- 6. Capital Expenditure Ratio -->
+<!-- ======================================== -->
+
+<h2>6. Capital Expenditure Ratio</h2>
+<p>Capital expenses as a percentage of total revenue.</p>
+<table>
+    <thead>
+        <tr>
+            <th>Entity</th>
+            <th>CapEx Ratio</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Condo 1</td>
+            <td>12%</td>
+        </tr>
+        <tr>
+            <td>Condo 2</td>
+            <td>8%</td>
+        </tr>
+        <tr>
+            <td>Condo 3</td>
+            <td>15%</td>
+        </tr>
+        <tr>
+            <td>Condo 4</td>
+            <td>20%</td>
+        </tr>
+        <tr>
+            <td>HOA</td>
+            <td>10%</td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="chart-container">
+    <canvas id="capexChart"></canvas>
+</div>
+
+<!-- ======================================== -->
+<!-- 7. Reserve Study Compliance -->
+<!-- ======================================== -->
+
+<h2>7. Reserve Study Compliance</h2>
+<p>Indicates whether each entity is following a reserve study plan (Yes/No/Partial).</p>
+<table>
+    <thead>
+        <tr>
+            <th>Entity</th>
+            <th>Compliance</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Condo 1</td>
+            <td>Yes</td>
+        </tr>
+        <tr>
+            <td>Condo 2</td>
+            <td>Partial</td>
+        </tr>
+        <tr>
+            <td>Condo 3</td>
+            <td>Yes</td>
+        </tr>
+        <tr>
+            <td>Condo 4</td>
+            <td>No</td>
+        </tr>
+        <tr>
+            <td>HOA</td>
+            <td>Yes</td>
+        </tr>
+    </tbody>
+</table>
+<p>Because “compliance” is textual (Yes/No), you may prefer a bar chart or a simple status indicator. For illustration, here’s a simple bar chart assigning 1 = Yes, 0.5 = Partial, 0 = No.</p>
+<div class="chart-container">
+    <canvas id="reserveStudyChart"></canvas>
+</div>
+
+<!-- ======================================== -->
+<!-- 8. Operating Budget Variance -->
+<!-- ======================================== -->
+
+<h2>8. Operating Budget Performance (Budget vs. Actual)</h2>
+<p>Example: Compare budgeted expenses vs. actual expenses to measure variance.</p>
+<table>
+    <thead>
+        <tr>
+            <th>Entity</th>
+            <th>Budgeted (USD)</th>
+            <th>Actual (USD)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Condo 1</td>
+            <td>100,000</td>
+            <td>98,000</td>
+        </tr>
+        <tr>
+            <td>Condo 2</td>
+            <td>80,000</td>
+            <td>85,000</td>
+        </tr>
+        <tr>
+            <td>Condo 3</td>
+            <td>90,000</td>
+            <td>92,000</td>
+        </tr>
+        <tr>
+            <td>Condo 4</td>
+            <td>70,000</td>
+            <td>75,000</td>
+        </tr>
+        <tr>
+            <td>HOA</td>
+            <td>120,000</td>
+            <td>115,000</td>
+        </tr>
+    </tbody>
+</table>
+<div class="chart-container">
+    <canvas id="budgetVarianceChart"></canvas>
+</div>
+
+<!-- ======================================== -->
+<!-- JAVASCRIPT FOR CHARTS -->
+<!-- ======================================== -->
+
+<script>
+    // -----------------------------------------
+    // Helper data arrays
+    // -----------------------------------------
+    const labels = ["Condo 1", "Condo 2", "Condo 3", "Condo 4", "HOA"];
+
+    // For each metric, we have some sample numeric data (in the same order as 'labels'):
+
+    // 1. Reserve Fund Ratio (as percentages)
+    const reserveFundData = [75, 65, 80, 55, 90];
+
+    // 2. Operating Surplus/Deficit (USD)
+    const operatingSurplusData = [20000, 5000, 8000, -2000, 15000];
+
+    // 3. Debt-to-Asset Ratio
+    const debtToAssetData = [0.40, 0.55, 0.30, 0.60, 0.25];
+
+    // 4. Delinquency Rate (as percentages)
+    const delinquencyData = [3.0, 5.5, 2.5, 6.0, 1.5];
+
+    // 5. Net Operating Income (NOI)
+    const noiData = [35000, 10000, 12000, 3000, 25000];
+
+    // 6. Capital Expenditure Ratio (as percentages)
+    const capexData = [12, 8, 15, 20, 10];
+
+    // 7. Reserve Study Compliance: (Yes=1, Partial=0.5, No=0)
+    const reserveStudyComplianceData = [1, 0.5, 1, 0, 1];
+
+    // 8. Operating Budget Performance (Budget vs. Actual)
+    // We'll compare as two separate datasets: budget array, actual array
+    const budgetedData = [100000, 80000, 90000, 70000, 120000];
+    const actualData   = [ 98000, 85000, 92000, 75000, 115000];
+
+    // -----------------------------------------
+    // 1. Reserve Fund Ratio
+    // -----------------------------------------
+    new Chart(document.getElementById("reserveFundChart"), {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: "Reserve Fund Ratio (%)",
+                    data: reserveFundData
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: "Percentage (%)"
+                    }
+                }
+            }
+        }
+    });
+
+    // -----------------------------------------
+    // 2. Operating Surplus/Deficit
+    // -----------------------------------------
+    new Chart(document.getElementById("operatingSurplusChart"), {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: "Operating Surplus/Deficit (USD)",
+                    data: operatingSurplusData
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    title: {
+                        display: true,
+                        text: "USD"
+                    }
+                }
+            }
+        }
+    });
+
+    // -----------------------------------------
+    // 3. Debt-to-Asset Ratio
+    // -----------------------------------------
+    new Chart(document.getElementById("debtToAssetChart"), {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: "Debt-to-Asset Ratio",
+                    data: debtToAssetData
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 1, 
+                    title: {
+                        display: true,
+                        text: "Ratio"
+                    }
+                }
+            }
+        }
+    });
+
+    // -----------------------------------------
+    // 4. Delinquency Rate
+    // -----------------------------------------
+    new Chart(document.getElementById("delinquencyRateChart"), {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: "Delinquency Rate (%)",
+                    data: delinquencyData
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: "Percentage (%)"
+                    }
+                }
+            }
+        }
+    });
+
+    // -----------------------------------------
+    // 5. Net Operating Income (NOI)
+    // -----------------------------------------
+    new Chart(document.getElementById("noiChart"), {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: "Net Operating Income (USD)",
+                    data: noiData
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    title: {
+                        display: true,
+                        text: "USD"
+                    }
+                }
+            }
+        }
+    });
+
+    // -----------------------------------------
+    // 6. Capital Expenditure Ratio
+    // -----------------------------------------
+    new Chart(document.getElementById("capexChart"), {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: "Capital Expenditure Ratio (%)",
+                    data: capexData
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: "Percentage (%)"
+                    }
+                }
+            }
+        }
+    });
+
+    // -----------------------------------------
+    // 7. Reserve Study Compliance
+    // -----------------------------------------
+    new Chart(document.getElementById("reserveStudyChart"), {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: "Reserve Study Compliance (Yes=1, Partial=0.5, No=0)",
+                    data: reserveStudyComplianceData
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    min: 0,
+                    max: 1,
+                    title: {
+                        display: true,
+                        text: "Compliance Level"
+                    }
+                }
+            }
+        }
+    });
+
+    // -----------------------------------------
+    // 8. Operating Budget Performance (Budget vs. Actual)
+    // -----------------------------------------
+    new Chart(document.getElementById("budgetVarianceChart"), {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: "Budgeted (USD)",
+                    data: budgetedData
+                },
+                {
+                    label: "Actual (USD)",
+                    data: actualData
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    title: {
+                        display: true,
+                        text: "USD"
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
