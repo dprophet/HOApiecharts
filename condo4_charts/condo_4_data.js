@@ -1,5 +1,37 @@
 define([], function() {
     return {
+        2025: {
+            expenses: {
+                "Office Expenses": 4014,
+                "HOA dues expense": 429240,
+                "Professional fees": 8314,
+                "Insurance": 4090,
+                "Sprinkler system": 19703,
+                "Painting and Plastering": 9509,
+                "Steps": 6340,
+                "Siding": 1920,
+                "Window Wells": 21890,
+                "Other repairs &\nmaintenance": 4943,
+                "Corporate Taxes": 650,
+                "Interest on loan\nindebtedness": 10015,
+                "Major Repairs - Roof": 1165268,
+                "Major Repairs -\nPowerwashing": 16365
+            },
+            income: {
+                "Revenue": null,
+                "\tCommon Charges": 586056,
+                "\tAssessments": 55272,
+                "\tHOA reimbursement": 30249,
+                "\tInterest Income": 7535,
+                "\tHOA dues income": 429240,
+                "Total Revenue": 1108352,
+                "Total Expenses": 1702261,
+                "Net Profit": -593909
+            },
+            assets: {
+                "Total Assets": 120550
+            }
+        },
         2024: {
             expenses: {
                 "Office Expenses": 1995,
